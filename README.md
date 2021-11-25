@@ -1,0 +1,1 @@
+# qiot-manufacturing-edge-machinery

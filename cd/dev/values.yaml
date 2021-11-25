@@ -1,0 +1,68 @@
+image:
+  ## Name of the image you want to build/deploy
+  ## Defaults to the release name
+  name: quay.io/qiotmanufacturing/datacenter-event-collector-jvm
+  ## Tag that you want to build/deploy
+  tag: latest 
+
+build:
+  enabled: false
+
+deploy:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+  serviceType: ClusterIP
+
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  route:
+    enabled: true
+    targetPort: http
+    tls:
+      enabled: true
+      termination: edge
+      insecureEdgeTerminationPolicy: Redirect
+      ## IMPORTANT: Do not check 'key' into git!
+      key:
+      caCertificate:
+      certificate:
+      destinationCACertificate:
+  livenessProbe:
+    tcpSocket:
+      port: http
+  readinessProbe:
+    httpGet:
+      path: /q/health/ready
+      port: http
+
+  applicationProperties:
+    enabled: true
+    #jvm
+    #mountPath:  /deployments/config
+    #s2i
+    #mountPath:  /home/quarkus/config
+    #JKube
+    mountPath:  /config
+    properties: |-
+      ## Properties go here
+      quarkus.kubernetes-client.namespace=manufacturing-dev
+      kafka.bootstrap.servers=stream-service:9092
+      influxdb.connectionUrl=timeseries-service:8086
+      influxdb.token=qiotmanufacturinginfluxdbtoken
+      influxdb.org=qiot
+      influxdb.data.bucket=manufacturing
+      
+      
+      
+      
+      

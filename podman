@@ -1,0 +1,13 @@
+podman run -it --rm \
+-v machinery-service-volume:/var/data/qiot/machinery:Z \
+-v /home/edge:/bootstrap:Z \
+-p 8080:8080/tcp \
+-e  LOG_LEVEL=DEBUG \
+-e  MACHINERY_SERIAL=abattaglmachinery04 \
+-e  MACHINERY_NAME=abattaglmachinery04 \
+-e  FACILITY_MANAGER_SERVICE_URL=https://facility-manager-service-factory.apps.manufacturingfacility.qiot.io \
+-e  TS_PATH=/bootstrap/truststore.p12 \
+-e  BROKER_SSL=TRUE \
+-e  BROKER_HOST=broker-service-edge-0-svc-rte-factory.apps.manufacturingfacility.qiot.io \
+-e  BROKER_PORT=443 \
+ quay.io/qiotmanufacturing/edge-machinery:1.0.0-SNAPSHOT
