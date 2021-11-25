@@ -26,3 +26,6 @@ hs_err_pid*
 /.project
 /.DS_Store
 /.settings/
+
+# vscode
+*.code-workspace
