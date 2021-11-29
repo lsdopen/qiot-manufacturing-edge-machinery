@@ -50,8 +50,7 @@ public class LatestProductLineRequestMessageProducer {
 
     @PostConstruct
     void init() {
-        LOGGER.debug(
-                "Bootstrapping latest product line request event producer...");
+        LOGGER.debug("Bootstrapping latest product line request event producer...");
         doInit();
 
         LOGGER.debug("Bootstrap completed");
@@ -69,10 +68,10 @@ public class LatestProductLineRequestMessageProducer {
     }
 
     void requestLatestProductLine(String machineryId) {
-        LOGGER.debug(
-                "Sending out a request for the latest product line available");
+        LOGGER.debug("Sending out a request for the latest product line available");
         try {
             String messagePayload = machineryId;
+            LOGGER.debug("\n\nmessagePayload: {}\n\n", messagePayload);
 
             producer.send(queue, messagePayload);
         } catch (Exception e) {
