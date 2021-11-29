@@ -967,3 +967,32 @@ messagePayload received for latestProductLineMessageConsumer:
 2021-11-29 13:45:15,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-0) No items available in conveyor belt for stage PACKAGING
 2021-11-29 13:45:15,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-4) No items available in conveyor belt for stage PRINTING
 2021-11-29 13:45:15,002 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-3) No ProductLine available
+2021-11-29 13:45:15,715 FINE  [pro.trace] (AmqpProvider :(1):[amqps://broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com:4443]) IN: CH[0] : Empty Frame
+2021-11-29 13:45:15,925 FINE  [pro.trace] (AmqpProvider :(2):[amqps://broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com:4443]) IN: CH[0] : Empty Frame
+2021-11-29 13:45:16,114 FINE  [pro.trace] (AmqpProvider :(3):[amqps://broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com:4443]) IN: CH[0] : Empty Frame
+2021-11-29 13:45:16,249 FINE  [pro.trace] (AmqpProvider :(4):[amqps://broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com:4443]) IN: CH[0] : Empty Frame
+2021-11-29 13:45:17,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.ColouringChainServiceImpl] (executor-thread-4) No items available in conveyor belt for stage COLORING
+2021-11-29 13:45:17,002 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-0) No ProductLine available
+2021-11-29 13:45:17,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-2) No items available in conveyor belt for stage PRINTING
+2021-11-29 13:45:17,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-3) No items available in conveyor belt for stage PACKAGING
+2021-11-29 13:45:17,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.WeavingChainServiceImpl] (executor-thread-1) No items available in conveyor belt for stage WEAVING
+2021-11-29 13:45:19,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.ColouringChainServiceImpl] (executor-thread-3) No items available in conveyor belt for stage COLORING
+2021-11-29 13:45:19,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.WeavingChainServiceImpl] (executor-thread-4) No items available in conveyor belt for stage WEAVING
+2021-11-29 13:45:19,002 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-2) No ProductLine available
+2021-11-29 13:45:19,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-1) No items available in conveyor belt for stage PACKAGING
+2021-11-29 13:45:19,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-0) No items available in conveyor belt for stage PRINTING
+2021-11-29 13:45:21,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-4) No items available in conveyor belt for stage PRINTING
+2021-11-29 13:45:21,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.ColouringChainServiceImpl] (executor-thread-1) No items available in conveyor belt for stage COLORING
+2021-11-29 13:45:21,001 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-0) No items available in conveyor belt for stage PACKAGING
+2021-11-29 13:45:21,002 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-2) No ProductLine available
+2021-11-29 13:45:21,001 DEBUG [io.qio.man.edg.mac.ser.pro.cha.WeavingChainServiceImpl] (executor-thread-3) No items available in conveyor belt for stage WEAVING
+2021-11-29 13:45:23,001 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-3) No items available in conveyor belt for stage PACKAGING
+2021-11-29 13:45:23,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-1) No items available in conveyor belt for stage PRINTING
+2021-11-29 13:45:23,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.WeavingChainServiceImpl] (executor-thread-4) No items available in conveyor belt for stage WEAVING
+2021-11-29 13:45:23,001 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-0) No ProductLine available
+2021-11-29 13:45:23,001 DEBUG [io.qio.man.edg.mac.ser.pro.cha.ColouringChainServiceImpl] (executor-thread-2) No items available in conveyor belt for stage COLORING
+2021-11-29 13:45:25,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.ColouringChainServiceImpl] (executor-thread-0) No items available in conveyor belt for stage COLORING
+2021-11-29 13:45:25,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PackagingChainServiceImpl] (executor-thread-2) No items available in conveyor belt for stage PACKAGING
+2021-11-29 13:45:25,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.WeavingChainServiceImpl] (executor-thread-3) No items available in conveyor belt for stage WEAVING
+2021-11-29 13:45:25,002 DEBUG [io.qio.man.edg.mac.ser.pro.cha.PrintingChainServiceImpl] (executor-thread-1) No items available in conveyor belt for stage PRINTING
+2021-11-29 13:45:25,002 WARN  [io.qio.man.edg.mac.ser.pro.ProductionChainServiceImpl] (executor-thread-4) No ProductLine available
