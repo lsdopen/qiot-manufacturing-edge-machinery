@@ -8,6 +8,7 @@ import java.util.Objects;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSContext;
 import javax.jms.JMSProducer;
 import javax.jms.Queue;
@@ -33,7 +34,7 @@ public class LatestProductLineRequestMessageProducer {
     // ConnectionFactory connectionFactory;
 
     @Inject
-    ActiveMQConnectionFactory connectionFactory;
+    ConnectionFactory connectionFactory;
 
     @Inject
     ObjectMapper MAPPER;

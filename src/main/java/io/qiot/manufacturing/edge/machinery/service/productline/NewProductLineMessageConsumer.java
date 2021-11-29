@@ -9,6 +9,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSConsumer;
 import javax.jms.JMSContext;
 import javax.jms.JMSException;
@@ -42,7 +43,7 @@ public class NewProductLineMessageConsumer implements Runnable {
     ObjectMapper MAPPER;
 
     @Inject
-    ActiveMQConnectionFactory connectionFactory;
+    ConnectionFactory connectionFactory;
 
     @Inject
     MachineryService machineryService;

@@ -2,7 +2,6 @@ package io.qiot.manufacturing.edge.machinery.util.producer;
 
 import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -12,12 +11,10 @@ import javax.annotation.PreDestroy;
 import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.jms.ConnectionFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.apache.activemq.artemis.api.core.TransportConfiguration;
-import org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory;
-import org.apache.activemq.artemis.core.remoting.impl.netty.TransportConstants;
 import org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
@@ -34,54 +31,9 @@ public class AMQConnectionFactoryProducer {
     @Inject
     Logger LOGGER;
 
-    @ConfigProperty(name = "qiot.artemis.sslEnabled", defaultValue = "false")
-    boolean sslEnabled;
+    private ConnectionFactory connectionFactory;
 
-    @ConfigProperty(name = "qiot.artemis.url")
-    String url;
-
-    @ConfigProperty(name = "qiot.artemis.username")
-    String username;
-
-    @ConfigProperty(name = "qiot.artemis.password")
-    String password;
-
-    @ConfigProperty(name = "qiot.artemis.protocol")
-    String protocol;
-
-    @ConfigProperty(name = "qiot.artemis.host")
-    String host;
-
-    @ConfigProperty(name = "qiot.artemis.port")
-    int port;
-
-    @ConfigProperty(name = "qiot.artemis.verifyHost")
-    boolean verifyHost;
-
-    @ConfigProperty(name = "qiot.artemis.trustAll")
-    boolean trustAll;
-
-    @ConfigProperty(name = "qiot.artemis.keyStoreProvider")
-    String keyStoreProvider;
-
-    @ConfigProperty(name = "qiot.artemis.keyStorePath")
-    String keyStorePath;
-
-    @ConfigProperty(name = "qiot.artemis.keyStorePassword")
-    String keyStorePassword;
-
-    @ConfigProperty(name = "qiot.artemis.trustStoreProvider")
-    String trustStoreProvider;
-
-    @ConfigProperty(name = "qiot.artemis.trustStorePath")
-    String trustStorePath;
-
-    @ConfigProperty(name = "qiot.artemis.trustStorePassword")
-    String trustStorePassword;
-
-    private ActiveMQConnectionFactory connectionFactory;
-
-    @ConfigProperty(name = "qiot.artemis.jndi")
+    @ConfigProperty(name = "qiot.jms.jndi")
     String jndi;
     
     InitialContext initialContext = null;
@@ -103,13 +55,12 @@ public class AMQConnectionFactoryProducer {
     void init() {
         writeLock.lock();
         try {
-            if (sslEnabled) {
-                LOGGER.info("SSL ENABLED");
-                // connectionFactory = initSSLConnectionFactory();
-                Hashtable<Object, Object> env = new Hashtable<>();
+            LOGGER.info("SSL ENABLED");
+            // connectionFactory = initSSLConnectionFactory();
+            Hashtable<Object, Object> env = new Hashtable<>();
 
-                env.put("java.naming.factory.initial",
-                        "org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory");
+            env.put("java.naming.factory.initial",
+                    "org.apache.qpid.jms.jndi.JmsInitialContextFactory");
 //                env.put("connectionFactory.ConnectionFactory", //
 //                        protocol + "://" + host + ":" + port//
 //                                + "?ha=false"//
@@ -127,19 +78,14 @@ public class AMQConnectionFactoryProducer {
 //                                + "&trustStorePath=" + trustStorePath//
 //                                + "&trustStorePassword=" + trustStorePassword);//
 
-              env.put("connectionFactory.ConnectionFactory", jndi);
-                
-                initialContext = new InitialContext(env);
+        env.put("connectionFactory.ConnectionFactory", jndi);
+            
+            initialContext = new InitialContext(env);
 
-                // Step 3. Look-up a JMS Connection Factory object from JNDI on
-                // server 0
-                connectionFactory = (ActiveMQConnectionFactory) initialContext
-                        .lookup("ConnectionFactory");
-            } else {
-                LOGGER.info("SSL DISABLED");
-                connectionFactory = new ActiveMQConnectionFactory(url, username,
-                        password);
-            }
+            // Step 3. Look-up a JMS Connection Factory object from JNDI on
+            // server 0
+            connectionFactory = (ConnectionFactory) initialContext
+                    .lookup("ConnectionFactory");
         } catch (NamingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -210,7 +156,7 @@ public class AMQConnectionFactoryProducer {
 //    }
 
     @Produces
-    public ActiveMQConnectionFactory produce() {
+    public ConnectionFactory produce() {
         readLock.lock();
         try {
             return connectionFactory;
