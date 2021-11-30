@@ -8,7 +8,7 @@
             "type": "java",
             "name": "Launch Current File",
             "request": "launch",
-            "mainClass": "io.qiot.manufacturing.edge.machinery.service.core"
+            "mainClass": "io.qiot.manufacturing.edge.machinery"
         }
     ]
 }
