@@ -62,8 +62,7 @@ public class LatestProductLineMessageConsumer implements Runnable {
 
     private Queue replyToQueue;
 
-    private final ExecutorService scheduler = Executors
-            .newSingleThreadExecutor();
+    private final ExecutorService scheduler = Executors.newSingleThreadExecutor();
 
     void init(@Observes BootstrapCompletedEventDTO event) {
         LOGGER.debug("Bootstrapping new product line durable subscriber...");
@@ -78,8 +77,7 @@ public class LatestProductLineMessageConsumer implements Runnable {
             context.close();
         context = connectionFactory.createContext(Session.AUTO_ACKNOWLEDGE);
 
-        replyToQueueName = productLineReplyToQueueNameProducer
-                .getReplyToQueueName(machineryService.getMachineryId());
+        replyToQueueName = productLineReplyToQueueNameProducer.getReplyToQueueName(machineryService.getMachineryId());
 
         replyToQueue = context.createQueue(replyToQueueName);
 
@@ -97,27 +95,33 @@ public class LatestProductLineMessageConsumer implements Runnable {
         while (true) {
             try {
                 Message message = consumer.receive();
+
                 String messagePayload = message.getBody(String.class);
-                if(Objects.isNull(messagePayload)) {
-                    LOGGER.warn("Empty message payload. Discarding: {}",messagePayload);
+
+                if (Objects.isNull(messagePayload)) {
+                    LOGGER.warn("Empty message payload. Discarding: {}", messagePayload);
                 }
-                ProductLineDTO productLine = MAPPER.readValue(messagePayload,
-                        ProductLineDTO.class);
+
+                ProductLineDTO productLine = MAPPER.readValue(messagePayload, ProductLineDTO.class);
                 LOGGER.debug("Received latest PRODUCTLINE available from the Factory Controller: \n {}", productLine);
+
                 ProductLineChangedEventDTO eventDTO = new ProductLineChangedEventDTO();
                 eventDTO.productLine = productLine;
                 prodictLineChangedEvent.fire(eventDTO);
+
             } catch (JMSException | IllegalStateRuntimeException e) {
-                LOGGER.error(
-                        "The messaging client returned an error: {} and will be restarted.",
-                        e);
+
+                LOGGER.error("The messaging client returned an error: {} and will be restarted.", e);
                 initSubscriber();
+
             } catch (JsonProcessingException e) {
-                LOGGER.error(
-                        "The message payload is malformed and the validation request will not be sent: {}",
-                        e);
+
+                LOGGER.error("The message payload is malformed and the validation request will not be sent: {}", e);
+
             } catch (Exception e) {
+
                 LOGGER.error("GENERIC ERROR", e);
+
             }
         }
     }

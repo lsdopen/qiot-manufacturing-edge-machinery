@@ -17,6 +17,16 @@ import io.qiot.manufacturing.all.commons.domain.production.ProductionChainStageE
 import io.qiot.manufacturing.edge.machinery.domain.ProductionCountersDTO;
 import io.quarkus.runtime.annotations.RegisterForReflection;
 
+// JMS
+import org.eclipse.microprofile.config.inject.ConfigProperty;
+import javax.jms.ConnectionFactory;
+import java.util.Objects;
+import javax.jms.JMSContext;
+import javax.jms.JMSProducer;
+import javax.jms.Queue;
+import javax.jms.Session;
+import javax.annotation.PostConstruct;
+
 /**
  * @author andreabattaglia
  *
@@ -34,15 +44,41 @@ public class CountersServiceImpl implements CountersService {
     @Inject
     ObjectMapper MAPPER;
 
+    // JMS
+    @Inject
+    ConnectionFactory connectionFactory;
+    private JMSContext context;
+    private JMSProducer producer;
+    private Queue queue;
+    @ConfigProperty(name = "qiot.productline.metrics.queue-prefix")
+    String latestProductLineMetricsQueueName;
+
+    @PostConstruct
+    void init() {
+        LOGGER.debug("Initiating ProductLine metrics emitter");
+        metricsInit();
+        LOGGER.debug("ProductLine metrics initiation complete");
+    }
+
+    private void metricsInit() {
+        if (Objects.nonNull(context))
+            context.close();
+        context = connectionFactory.createContext(Session.AUTO_ACKNOWLEDGE);
+
+        producer = context.createProducer();
+
+        queue = context.createQueue(latestProductLineMetricsQueueName);
+    }
+
     private final Map<UUID, ProductionCountersDTO> productionCounters;
 
     public CountersServiceImpl() {
 
         productionCounters = new TreeMap<UUID, ProductionCountersDTO>();
     }
-    
+
     @Override
-    public Map<UUID, ProductionCountersDTO> getCounters(){
+    public Map<UUID, ProductionCountersDTO> getCounters() {
         return productionCounters;
     }
 
@@ -61,6 +97,7 @@ public class CountersServiceImpl implements CountersService {
             return id;
         } finally {
             logProductLine();
+            emitProductLineMetrics();
         }
     }
 
@@ -79,6 +116,7 @@ public class CountersServiceImpl implements CountersService {
         productionCounters.get(productLineId).waitingForValidationCounters
                 .get(stage).incrementAndGet();
         logProductLine();
+        emitProductLineMetrics();
     }
 
     @Override
@@ -99,6 +137,7 @@ public class CountersServiceImpl implements CountersService {
                     .incrementAndGet();
         } finally {
             logProductLine();
+            emitProductLineMetrics();
         }
     }
 
@@ -109,6 +148,7 @@ public class CountersServiceImpl implements CountersService {
                 .get(stage).decrementAndGet();
         productionCounters.get(productLineId).discarded.incrementAndGet();
         logProductLine();
+        emitProductLineMetrics();
     }
 
     void logProductLine() {
@@ -123,4 +163,18 @@ public class CountersServiceImpl implements CountersService {
                         e);
             }
     }
+
+    void emitProductLineMetrics() {
+        LOGGER.debug("Emitting production summary metrics");
+        try {
+            String metricsPayload = MAPPER.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(productionCounters);
+
+            producer.send(queue, metricsPayload);
+        } catch (Exception e) {
+            LOGGER.error("GENERIC ERROR", e);
+        }
+
+    }
+
 }
