@@ -96,26 +96,32 @@ public class LatestProductLineMessageConsumer implements Runnable {
             try {
                 Message message = consumer.receive();
 
-                LOGGER.debug("\n\nmessage. receive body: {}", message.getBody(String.class));
-
                 String messagePayload = message.getBody(String.class);
-                LOGGER.debug("\n\nmessagePayload received for latestProductLineMessageConsumer: \n {}\n\n",
-                        messagePayload);
+
                 if (Objects.isNull(messagePayload)) {
                     LOGGER.warn("Empty message payload. Discarding: {}", messagePayload);
                 }
+
                 ProductLineDTO productLine = MAPPER.readValue(messagePayload, ProductLineDTO.class);
                 LOGGER.debug("Received latest PRODUCTLINE available from the Factory Controller: \n {}", productLine);
+
                 ProductLineChangedEventDTO eventDTO = new ProductLineChangedEventDTO();
                 eventDTO.productLine = productLine;
                 prodictLineChangedEvent.fire(eventDTO);
+
             } catch (JMSException | IllegalStateRuntimeException e) {
+
                 LOGGER.error("The messaging client returned an error: {} and will be restarted.", e);
                 initSubscriber();
+
             } catch (JsonProcessingException e) {
+
                 LOGGER.error("The message payload is malformed and the validation request will not be sent: {}", e);
+
             } catch (Exception e) {
+
                 LOGGER.error("GENERIC ERROR", e);
+
             }
         }
     }
