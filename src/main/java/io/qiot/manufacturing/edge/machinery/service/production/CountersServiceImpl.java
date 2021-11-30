@@ -97,6 +97,7 @@ public class CountersServiceImpl implements CountersService {
             return id;
         } finally {
             logProductLine();
+            emitProductLineMetrics();
         }
     }
 
@@ -115,6 +116,7 @@ public class CountersServiceImpl implements CountersService {
         productionCounters.get(productLineId).waitingForValidationCounters
                 .get(stage).incrementAndGet();
         logProductLine();
+        emitProductLineMetrics();
     }
 
     @Override
@@ -135,6 +137,7 @@ public class CountersServiceImpl implements CountersService {
                     .incrementAndGet();
         } finally {
             logProductLine();
+            emitProductLineMetrics();
         }
     }
 
@@ -145,6 +148,7 @@ public class CountersServiceImpl implements CountersService {
                 .get(stage).decrementAndGet();
         productionCounters.get(productLineId).discarded.incrementAndGet();
         logProductLine();
+        emitProductLineMetrics();
     }
 
     void logProductLine() {
@@ -159,4 +163,18 @@ public class CountersServiceImpl implements CountersService {
                         e);
             }
     }
+
+    void emitProductLineMetrics() {
+        LOGGER.debug("Emitting production summary metrics");
+        try {
+            String metricsPayload = MAPPER.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(productionCounters);
+
+            producer.send(queue, metricsPayload);
+        } catch (Exception e) {
+            LOGGER.error("GENERIC ERROR", e);
+        }
+
+    }
+
 }

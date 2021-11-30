@@ -29,3 +29,6 @@ hs_err_pid*
 
 # vscode
 *.code-workspace
+
+# misc
+log
