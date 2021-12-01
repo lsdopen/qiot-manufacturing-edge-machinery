@@ -1,7 +1,6 @@
 package io.qiot.manufacturing.edge.machinery.service.production;
 
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -47,20 +46,35 @@ public class CountersServiceImpl implements CountersService {
     // JMS
     @Inject
     ConnectionFactory connectionFactory;
+
     private JMSContext context;
+
     private JMSProducer producer;
+
     private Queue queue;
+
     @ConfigProperty(name = "qiot.productline.metrics.queue-prefix")
     String latestProductLineMetricsQueueName;
+
+    @ConfigProperty(name = "qiot.machinery.serial")
+    String machineSerial;
+    @ConfigProperty(name = "qiot.machinery.name")
+    String machineName;
+
+    private MetricsDTO metrics;
 
     @PostConstruct
     void init() {
         LOGGER.debug("Initiating ProductLine metrics emitter");
-        metricsInit();
+        doInit();
         LOGGER.debug("ProductLine metrics initiation complete");
     }
 
-    private void metricsInit() {
+    private void doInit() {
+        LOGGER.info("machineSerial: {}", machineSerial);
+        LOGGER.info("machineName: {}", machineName);
+        metrics = new MetricsDTO(machineSerial, machineName);
+
         if (Objects.nonNull(context))
             context.close();
         context = connectionFactory.createContext(Session.AUTO_ACKNOWLEDGE);
@@ -70,28 +84,21 @@ public class CountersServiceImpl implements CountersService {
         queue = context.createQueue(latestProductLineMetricsQueueName);
     }
 
-    private final Map<UUID, ProductionCountersDTO> productionCounters;
-
-    public CountersServiceImpl() {
-
-        productionCounters = new TreeMap<UUID, ProductionCountersDTO>();
-    }
-
     @Override
     public Map<UUID, ProductionCountersDTO> getCounters() {
-        return productionCounters;
+        return metrics.getProductionCounters();
     }
 
     @Override
     public int recordNewItem(UUID productLineId) {
         try {
-            if (!productionCounters.containsKey(productLineId))
-                productionCounters.put(productLineId,
+            if (!metrics.getProductionCounters().containsKey(productLineId))
+                metrics.getProductionCounters().put(productLineId,
                         new ProductionCountersDTO(productLineId));
-            int id = productionCounters.get(productLineId).totalItems
+            int id = metrics.getProductionCounters().get(productLineId).totalItems
                     .incrementAndGet();
             // TODO: improve state transition here
-            productionCounters.get(productLineId).stageCounters
+            metrics.getProductionCounters().get(productLineId).stageCounters
                     .get(ProductionChainStageEnum.WEAVING).incrementAndGet();
 
             return id;
@@ -104,16 +111,16 @@ public class CountersServiceImpl implements CountersService {
     // @Override
     // public void recordStageBegin(int itemId, UUID productLineId,
     // ProductionChainStageEnum stage) {
-    // productionCounters.get(productLineId).stageCounters
+    // metrics.getProductionCounters().get(productLineId).stageCounters
     // .get(stage).incrementAndGet();
     // }
 
     @Override
     public void recordStageEnd(int itemId, UUID productLineId,
             ProductionChainStageEnum stage) {
-        productionCounters.get(productLineId).stageCounters.get(stage)
+        metrics.getProductionCounters().get(productLineId).stageCounters.get(stage)
                 .decrementAndGet();
-        productionCounters.get(productLineId).waitingForValidationCounters
+        metrics.getProductionCounters().get(productLineId).waitingForValidationCounters
                 .get(stage).incrementAndGet();
         logProductLine();
         emitProductLineMetrics();
@@ -123,17 +130,17 @@ public class CountersServiceImpl implements CountersService {
     public void recordStageSuccess(int itemId, UUID productLineId,
             ProductionChainStageEnum stage) {
         try {
-            productionCounters.get(productLineId).waitingForValidationCounters
+            metrics.getProductionCounters().get(productLineId).waitingForValidationCounters
                     .get(stage).decrementAndGet();
             if (stage == ProductionChainStageEnum.PACKAGING) {
-                productionCounters.get(productLineId).completed
+                metrics.getProductionCounters().get(productLineId).completed
                         .incrementAndGet();
                 return;
             }
 
             ProductionChainStageEnum nextStage = ProductionChainStageEnum
                     .values()[stage.ordinal() + 1];
-            productionCounters.get(productLineId).stageCounters.get(nextStage)
+            metrics.getProductionCounters().get(productLineId).stageCounters.get(nextStage)
                     .incrementAndGet();
         } finally {
             logProductLine();
@@ -144,9 +151,9 @@ public class CountersServiceImpl implements CountersService {
     @Override
     public void recordStageFailure(int itemId, UUID productLineId,
             ProductionChainStageEnum stage) {
-        productionCounters.get(productLineId).waitingForValidationCounters
+        metrics.getProductionCounters().get(productLineId).waitingForValidationCounters
                 .get(stage).decrementAndGet();
-        productionCounters.get(productLineId).discarded.incrementAndGet();
+        metrics.getProductionCounters().get(productLineId).discarded.incrementAndGet();
         logProductLine();
         emitProductLineMetrics();
     }
@@ -155,7 +162,7 @@ public class CountersServiceImpl implements CountersService {
         if (LOGGER.isDebugEnabled())
             try {
                 String json = MAPPER.writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(productionCounters);
+                        .writeValueAsString(metrics.getProductionCounters());
                 LOGGER.info("Production summary:\n\n{}", json);
             } catch (JsonProcessingException e) {
                 LOGGER.error(
@@ -167,8 +174,7 @@ public class CountersServiceImpl implements CountersService {
     void emitProductLineMetrics() {
         LOGGER.debug("Emitting production summary metrics");
         try {
-            String metricsPayload = MAPPER.writerWithDefaultPrettyPrinter()
-                    .writeValueAsString(productionCounters);
+            String metricsPayload = MAPPER.writeValueAsString(metrics);
 
             producer.send(queue, metricsPayload);
         } catch (Exception e) {
