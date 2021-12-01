@@ -4,8 +4,8 @@ Wants=network.target
 After=network-online.target
 
 [Service]
-ExecStartPre=-/usr/bin/mkdir -p /var/data/qiot
-ExecStart=/usr/bin/podman run -it --rm -v /var/data/qiot:/var/data/qiot -p 8081:8080/tcp --dns 1.1.1.1 --dns 8.8.8.8 -e LOG_LEVEL=DEBUG -e MACHINERY_SERIAL=fitlet-00175-b2 -e MACHINERY_NAME=fitlet-00175-b2 -e FACILITY_MANAGER_SERVICE_URL=https://facility-manager-service-factory.apps.factory.hackfest.seagyndavis.com:4443 -e BROKER_PROTOCOL=amqps -e BROKER_SSL=true -e BROKER_HOST=broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com -e BROKER_PORT=4443 -e HTTP_PORT=8080 quay.io/jules0/lsdqiot-manufacturing-edge-machinery:latest
+ExecStartPre=-/usr/bin/mkdir -p /root/data
+ExecStart=/usr/bin/podman run -it --rm -v machinery-service-volume:/var/data/qiot:Z -p 8081:8080/tcp --dns 1.1.1.1 --dns 8.8.8.8 -e LOG_LEVEL=DEBUG -e MACHINERY_SERIAL=fitlet-00175-b2 -e MACHINERY_NAME=fitlet-00175-b2 -e FACILITY_MANAGER_SERVICE_URL=https://facility-manager-service-factory.apps.factory.hackfest.seagyndavis.com:4443 -e BROKER_PROTOCOL=amqps -e BROKER_SSL=true -e BROKER_HOST=broker-service-edge-0-svc-rte-factory.apps.factory.hackfest.seagyndavis.com -e BROKER_PORT=4443 -e HTTP_PORT=8080 quay.io/jules0/lsdqiot-manufacturing-edge-machinery:latest
 ExecStop=/usr/bin/podman stop -t 10 quay.io/jules0/lsdqiot-manufacturing-edge-machinery:latest
 Restart=always
 
